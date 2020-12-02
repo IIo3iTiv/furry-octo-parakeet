@@ -32,18 +32,17 @@ let player = new Player(x, y, 'black', 150, 20, 0)
 player.draw()
 
 function moveRect(evt){
-    player.velocity = 5
     switch (evt.keyCode) {
         case 37: 
-            if(player.x>0) {
-                player.x -= player.velocity
+            if(player.x >= 0) {
+                player.velocity = -10
             }
         break
         case 39: 
-            if(player.x<innerWidth) {
-                player.x += player.velocity
+            if(player.x <= canvas.width) {
+                player.velocity = 10
             }
-        break           
+        break         
     }
 }
 
@@ -52,6 +51,11 @@ function animate() {
     cvx.clearRect(0, 0, canvas.width, canvas.height)
     player.draw()
     player.update()
+    if (player.velocity > 0) {
+        player.velocity -= 0.2
+    } else if (player.velocity < 0) {
+        player.velocity += 0.2
+    }
 }
 
 addEventListener('keydown', moveRect)
