@@ -1,8 +1,16 @@
 const canvas = document.getElementById("field")
 const cvx = canvas.getContext('2d')
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+canvas.width = 600
+canvas.height = 600
+
+
+function getRandom(min, max) { // Вычисление рандомного угла
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1) + min)
+  }
+
 
 class Player {
     constructor(x, y, color, width, height, velocity) {
@@ -21,13 +29,16 @@ class Player {
     }
 
     update() {
-        if ((this.x) < 0 && this.velocity < 0) {
+
+        if ((this.x < 0 && this.velocity < 0) || ((this.x + this.width) > canvas.width && this.velocity > 0)) { //Столкновение платформы со стеной
             this.velocity = 0
-        } else if ((this.x + this.width) > canvas.width && this.velocity > 0) {
-            this.velocity = 0
-        } else {
-            this.x += this.velocity
+        }  
+        if (player.velocity > 0) { // Иннерция платформы
+            player.velocity -= 0.5
+        } else if (player.velocity < 0) {
+            player.velocity += 0.5
         }
+        this.x += this.velocity
     }
 } 
 
@@ -49,17 +60,28 @@ class Ball {
     }
     
     update() {
-        if (this.velocityY == 0) {
+        if (this.velocityY == 0) { // Движение шарика вместе с платформой
             this.ballX = player.x + player.width / 2
         }
-        if (this.ballY - this.radius < 0) {
+        if (this.ballY - this.radius < 0) { // Отскок от потолка
             this.velocityY = 0 - this.velocityY
         }
-        if (this.ballY + this.radius > player.y && this.ballX > player.x && this.ballX < player.x+player.width) {
+        if ((this.ballY + this.radius > player.y && this.ballY < player.y + player.height) && (this.ballX > player.x && this.ballX < player.x+player.width)) { // Отскок от платформы
+            if(this.velocityX == 0) { // Рандомный отскок от платформы если нет угла
+                this.velocityX = getRandom(-5, 5)
+            }
             this.velocityY = 0 - this.velocityY
-            this.velocityX = 5
         }
-            this.ballY += this.velocityY
+        if (this.ballX - this.radius < 0 || this.ballX + this.radius > canvas.width) { // Отскок от стен
+            this.velocityX = 0 - this.velocityX
+        }
+        if (this.ballY > canvas.height) { // Падение шарика в бездну
+            this.velocityX = 0
+            this.velocityY = 0
+            this.ballX = player.x + player.width / 2
+            this.ballY = player.y - ball.radius
+        }
+            this.ballY += this.velocityY  // Движения по X и Y
             this.ballX += this.velocityX
     }
 }
@@ -67,28 +89,36 @@ class Ball {
 const x = canvas.width / 2
 const y = canvas.height / 1.25
 
-let player = new Player(x, y, 'black', 150, 20, 0)
-
+let player = new Player(x, y, 'white', 150, 20, 0)
+player.x = player.x - player.width / 2
 const ballX = player.x + player.width / 2
-const ballY = y - 12
+const ballY = player.y
 
-let ball = new Ball(ballX, ballY, 'black', 10, 0, 0)
+let ball = new Ball(ballX, ballY, 'white', 10, 0, 0)
+ball.ballY = player.y - ball.radius
 
 function moveRect(evt){
     switch (evt.keyCode) {
         case 37: 
-            if(player.x > 0) {
+            if(player.x > 0) { // Движение платформы влево
                 player.velocity = -10
             }
         break
         case 39: 
-            if(player.x < canvas.width) {
+            if(player.x < canvas.width) { // Движение платформы вправо
                 player.velocity = 10
             }
         break 
         case 32:
-            if(ball.velocityY == 0) {
-               ball.velocityY = -10 
+            if(ball.velocityY == 0) { // Запуск мяча
+               ball.velocityY = -10
+               if (player.velocity > 0) {
+                ball.velocityX = 5
+               } else if (player.velocity < 0) {
+                ball.velocityX = -5
+               } else {
+                   ball.velocityX = 0
+               }
             }
         break       
     }
@@ -101,11 +131,6 @@ function animate() {
     player.update()
     ball.draw()
     ball.update()
-    if (player.velocity > 0) {
-        player.velocity -= 0.5
-    } else if (player.velocity < 0) {
-        player.velocity += 0.5
-    }
 }
 
 addEventListener('keydown', moveRect)

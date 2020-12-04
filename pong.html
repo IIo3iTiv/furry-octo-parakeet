@@ -9,10 +9,20 @@
         body {
             margin: 0;
         }
+        #canvas {
+            border: 3px solid gray;
+            width: 600px;
+            margin: auto;
+            background-color: black;
+        }
     </style>
 </head>
 <body>
-    <canvas id="field"></canvas>
+    <div id=container>
+        <div id="canvas">
+         <canvas id="field"></canvas>
+        </div>
+    </div>
     <script src="assets/js/pong.js"></script>
 </body>
 </html>
