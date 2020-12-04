@@ -12,7 +12,7 @@ function getRandom(min, max) { // Вычисление рандомного уг
   }
 
 
-class Player {
+class Player { // Создание игрока
     constructor(x, y, color, width, height, velocity) {
         this.x = x
         this.y = y
@@ -37,7 +37,7 @@ class Player {
     }
 } 
 
-class Ball {
+class Ball { // Создание шарика
     constructor(ballX, ballY, color, radius, velocityY, velocityX) {
         this.ballX = ballX
         this.ballY = ballY
@@ -59,16 +59,16 @@ class Ball {
             this.ballX = player.x + player.width / 2
         }
         if (this.ballY - this.radius < 0) { // Отскок от потолка
-            this.velocityY = 0 - this.velocityY
+            this.velocityY = -this.velocityY
         }
-        if ((this.ballY + this.radius > player.y && this.ballY < player.y + player.height) && (this.ballX > player.x && this.ballX < player.x+player.width)) { // Отскок от платформы
+        if ((this.ballY + this.radius > player.y && this.ballY + this.radius < player.y + player.height) && (this.ballX + this.radius > player.x && this.ballX - this.radius < player.x+player.width)) { // Отскок от платформы
             if(this.velocityX == 0) { // Рандомный отскок от платформы если нет угла
                 this.velocityX = getRandom(-5, 5)
             }
-            this.velocityY = 0 - this.velocityY
+            this.velocityY = -this.velocityY      
         }
         if (this.ballX - this.radius < 0 || this.ballX + this.radius > canvas.width) { // Отскок от стен
-            this.velocityX = 0 - this.velocityX
+            this.velocityX = -this.velocityX
         }
         if (this.ballY > canvas.height) { // Падение шарика в бездну
             this.velocityX = 0
@@ -76,16 +76,47 @@ class Ball {
             this.ballX = player.x + player.width / 2
             this.ballY = player.y - ball.radius
         }
-            this.ballY += this.velocityY  // Движения по X и Y
+      //  if ((this.ballY > player.y && this.ballY < player.y + player.height) && (this.ballX > player.x || this.ballX < player.x + player.width)) {
+      //      this.velocityY = -this.velocityY
+      //     this.velocityX = -this.velocityX
+      //  }
+            this.ballY += this.velocityY  // Движения шарика по X и Y
             this.ballX += this.velocityX
+     }
     }
-}
+
+    class Brick { // Создание кирпичей
+        constructor(brickX, brickY, color, width, height) {
+            this.brickX = brickX
+            this.brickY = brickY
+            this.color = color
+            this.width = width
+            this.height = height
+        }
+        
+        draw() {
+            cvx.beginPath()
+            cvx.fillStyle = this.color
+            cvx.fillRect(this.brickX, this.brickY, this.width, this.height) 
+        }
+
+        update() {
+            this.draw()
+
+            if () { //Столкновение шарика с кирпичом
+
+            }
+        }
+    }
 
 const x = canvas.width / 2
 const y = canvas.height / 1.25
 const playerWidth = canvas.width / 5
 const playerHeight = canvas.height / 40
 const ballRadius = playerHeight / 1.5
+const basePlayerVelocity = playerWidth / 10
+const baseBallVelocity =  basePlayerVelocity / 1.3
+const bricks = []
 
 let player = new Player(x, y, 'white', playerWidth, playerHeight, 0)
 player.x = player.x - player.width / 2
@@ -99,17 +130,17 @@ function moveRect(evt){
     switch (evt.keyCode) {
         case 37: 
             if(player.x > 0) { // Движение платформы влево
-                player.velocity = -10
+                player.velocity = -basePlayerVelocity
             }
         break
         case 39: 
             if(player.x < canvas.width) { // Движение платформы вправо
-                player.velocity = 10
+                player.velocity = basePlayerVelocity
             }
         break 
         case 32:
             if(ball.velocityY == 0) { // Запуск мяча
-               ball.velocityY = -10
+               ball.velocityY = -baseBallVelocity
                if (player.velocity > 0) {
                 ball.velocityX = 5
                } else if (player.velocity < 0) {
@@ -121,6 +152,12 @@ function moveRect(evt){
         break       
     }
 }
+
+function spawnBricks() {
+    bricks.push(new Brick(100, 100, 'white', 50, 50))
+}
+spawnBricks()
+
 
 function stopMove(evt){ // Остановка платформы
     switch (evt.keyCode) {
@@ -140,6 +177,9 @@ function animate() {
     player.update()
     ball.draw()
     ball.update()
+    bricks.forEach((brick) => {
+        brick.update()
+    })
 }
 
 addEventListener('keydown', moveRect)
