@@ -1,8 +1,8 @@
 const canvas = document.getElementById("field")
 const cvx = canvas.getContext('2d')
 
-canvas.width = 600
-canvas.height = 600
+canvas.width = innerWidth / 2
+canvas.height = innerHeight / 1.1
 
 
 function getRandom(min, max) { // Вычисление рандомного угла
@@ -33,11 +33,6 @@ class Player {
         if ((this.x < 0 && this.velocity < 0) || ((this.x + this.width) > canvas.width && this.velocity > 0)) { //Столкновение платформы со стеной
             this.velocity = 0
         }  
-        if (player.velocity > 0) { // Иннерция платформы
-            player.velocity -= 0.5
-        } else if (player.velocity < 0) {
-            player.velocity += 0.5
-        }
         this.x += this.velocity
     }
 } 
@@ -88,13 +83,16 @@ class Ball {
 
 const x = canvas.width / 2
 const y = canvas.height / 1.25
+const playerWidth = canvas.width / 5
+const playerHeight = canvas.height / 40
+const ballRadius = playerHeight / 1.5
 
-let player = new Player(x, y, 'white', 150, 20, 0)
+let player = new Player(x, y, 'white', playerWidth, playerHeight, 0)
 player.x = player.x - player.width / 2
 const ballX = player.x + player.width / 2
 const ballY = player.y
 
-let ball = new Ball(ballX, ballY, 'white', 10, 0, 0)
+let ball = new Ball(ballX, ballY, 'white', ballRadius, 0, 0)
 ball.ballY = player.y - ball.radius
 
 function moveRect(evt){
@@ -124,6 +122,17 @@ function moveRect(evt){
     }
 }
 
+function stopMove(evt){ // Остановка платформы
+    switch (evt.keyCode) {
+        case 37: // Движение платформы влево
+                player.velocity = 0
+        break
+        case 39:  // Движение платформы вправо
+                player.velocity = 0
+        break 
+    }
+}
+
 function animate() {
     requestAnimationFrame(animate)
     cvx.clearRect(0, 0, canvas.width, canvas.height)
@@ -134,5 +143,6 @@ function animate() {
 }
 
 addEventListener('keydown', moveRect)
+addEventListener('keyup', stopMove)
 
 animate()
