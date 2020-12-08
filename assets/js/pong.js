@@ -124,7 +124,7 @@ const playerWidth = canvas.width / 5
 const playerHeight = canvas.height / 40
 const ballRadius = playerHeight / 1.5
 const basePlayerVelocity = playerWidth / 10
-const baseBallVelocity =  basePlayerVelocity / 1.3
+const baseBallVelocity =  basePlayerVelocity / 1.5
 const bricks = []
 
 let player = new Player(x, y, 'white', playerWidth, playerHeight, 0)
