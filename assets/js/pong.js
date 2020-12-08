@@ -10,7 +10,8 @@ function getRandom(min, max) { // Вычисление рандомного уг
     max = Math.floor(max)
     return Math.floor(Math.random() * (max - min + 1) + min)
   }
-
+let rnd = getRandom(0, 1)
+let losePoints = 0
 
 class Player { // Создание игрока
     constructor(x, y, color, width, height, velocity) {
@@ -63,23 +64,25 @@ class Ball { // Создание шарика
         }
         if ((this.ballY + this.radius > player.y && this.ballY + this.radius < player.y + player.height) && (this.ballX + this.radius > player.x && this.ballX - this.radius < player.x+player.width)) { // Отскок от платформы
             if(this.velocityX == 0) { // Рандомный отскок от платформы если нет угла
-                this.velocityX = getRandom(-5, 5)
+                rnd = getRandom(0, 1)
+                if(rnd == 1) {
+                    this.velocityX = -5
+                } else {this.velocityX = 5}
             }
-            this.velocityY = -this.velocityY      
+            if (this.ballY > player.y && this.ballY < player.y + player.height) { //Столкновение со стенами кирпича
+                this.velocityX = -this.velocityX
+            } else {this.velocityY = -this.velocityY}   
         }
         if (this.ballX - this.radius < 0 || this.ballX + this.radius > canvas.width) { // Отскок от стен
             this.velocityX = -this.velocityX
         }
         if (this.ballY > canvas.height) { // Падение шарика в бездну
-            this.velocityX = 0
-            this.velocityY = 0
-            this.ballX = player.x + player.width / 2
-            this.ballY = player.y - ball.radius
+                this.velocityX = 0
+                this.velocityY = 0
+                this.ballX = player.x + player.width / 2
+                this.ballY = player.y - ball.radius
+                //losePoints += 1
         }
-      //  if ((this.ballY > player.y && this.ballY < player.y + player.height) && (this.ballX > player.x || this.ballX < player.x + player.width)) {
-      //      this.velocityY = -this.velocityY
-      //     this.velocityX = -this.velocityX
-      //  }
             this.ballY += this.velocityY  // Движения шарика по X и Y
             this.ballX += this.velocityX
      }
@@ -103,8 +106,14 @@ class Ball { // Создание шарика
         update() {
             this.draw()
 
-            if () { //Столкновение шарика с кирпичом
-
+            if (ball.ballX + ball.radius > this.brickX && 
+                ball.ballX - ball.radius < this.brickX + this.width && 
+                ball.ballY + ball.radius > this.brickY &&
+                ball.ballY - ball.radius < this.brickY + this.height
+                ) { //Столкновение шарика с кирпичом
+                if (ball.ballY > this.brickY && ball.ballY < this.brickY + this.height) { //Столкновение со стенами кирпича
+                    ball.velocityX = -ball.velocityX
+                } else {ball.velocityY = -ball.velocityY}
             }
         }
     }
@@ -154,7 +163,14 @@ function moveRect(evt){
 }
 
 function spawnBricks() {
-    bricks.push(new Brick(100, 100, 'white', 50, 50))
+    let bricksWidth = canvas.width / 8
+    let bricksHeight = canvas.height / 40
+    //let bricksCount = canva.width /
+    for (let i = canvas.height / 10; i < canvas.height / 4; i = i + bricksHeight + 10) {
+        for (let j = canvas.width / 10; j < canvas.width - bricksWidth; j = j + bricksWidth + 10) {
+            bricks.push(new Brick(j, i, 'white', bricksWidth, bricksHeight))
+        } 
+    }
 }
 spawnBricks()
 
@@ -177,8 +193,15 @@ function animate() {
     player.update()
     ball.draw()
     ball.update()
-    bricks.forEach((brick) => {
+    bricks.forEach((brick, index) => {
         brick.update()
+        if (ball.ballX + ball.radius > brick.brickX && 
+            ball.ballX - ball.radius < brick.brickX + brick.width && 
+            ball.ballY + ball.radius > brick.brickY &&
+            ball.ballY - ball.radius < brick.brickY + brick.height
+            ) { //Столкновение шарика с кирпичом
+            bricks.splice(index, 1)
+        }
     })
 }
 
